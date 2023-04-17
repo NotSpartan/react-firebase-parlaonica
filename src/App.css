@@ -129,6 +129,8 @@ section .form {
   height: calc(100vh - 70px);
   width: 100vw;
 }
+
+/* //Users */
 .users_container {
   margin-top: 10px;
   border-right: 2px solid var(--darkgrey-6);

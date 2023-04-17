@@ -18,7 +18,7 @@ const Navbar = () => {
             isOnline: false,
         });
         await signOut(auth);
-        navigate.replace("/login");
+        navigate("/", { replace: true });
     };
     return (
         <nav>
