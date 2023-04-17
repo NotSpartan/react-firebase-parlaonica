@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import Camera from "../components/svg/Camera";
 import Img from "../image1.jpg";
 import {storage, db, auth} from "../firebase";
-import {ref, getDownloadURL, uploadBytes} from "firebase/storage";
+import {ref, getDownloadURL, uploadBytes, deleteObject} from "firebase/storage";
 import {getDoc, doc, updateDoc} from "firebase/firestore"
+import Delete from "../components/svg/Delete";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [img, setImg] = useState('')
-  const [user, setUser] = useState()
+  const [user, setUser] = useState();
+  const navigate = useNavigate();
   useEffect(() => {
     getDoc(doc(db, "users", auth.currentUser.uid)).then(docSnap =>{
       if(docSnap.exists){
@@ -22,6 +25,9 @@ const Profile = () => {
           );
 
           try {
+            if(user.avatarPath){
+              await deleteObject(ref(storage, user.avatarPath));
+            }
             const snap = uploadBytes(imgRef, img);
             const url = await getDownloadURL(ref(storage, (await snap).ref.fullPath));
   
@@ -38,7 +44,26 @@ const Profile = () => {
         uploadImg();
       }
   }, [img]);
-  return(
+
+  const deleteImage = async () =>{
+    try {
+      const confirm = window.confirm('Delete avatar?')
+        if(confirm){
+          await deleteObject(ref(storage, user.avatarPath));
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+            avatar: "",
+            avatarPath: "",
+          });
+          navigate("/", { replace: true });
+      }
+      
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+
+  return user ?(
     <section>
       <div className="profile_container">
         <div className="img_container">
@@ -47,6 +72,7 @@ const Profile = () => {
             <label htmlFor="photo">
               <Camera />
             </label>
+            {user.avatar ? <Delete deleteImage={deleteImage}/> : null }
             <input type="file" accept='image/*' style={{display: "none"}} id="photo" onChange={e => setImg(e.target.files[0])}/>
           </div>
         </div>
@@ -56,11 +82,12 @@ const Profile = () => {
         <h3>{user && user.name}</h3>
         <p>{user && user.email}</p>
         <hr />
-        <small>Joined on...</small>
+        <small>Joined on: {user.createdAt.toDate().toDateString()}</small>
       </div>
     </section>
 
-  )
+
+  )    :null;
 }
 
 export default Profile;
