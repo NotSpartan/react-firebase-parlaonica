@@ -2,9 +2,10 @@
 //rsc kratica za početni skeleton funkcije
 import React, {useEffect, useState} from 'react';
 import {db, auth, storage} from "../firebase";
-import { collection, query, where, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, Timestamp, orderBy } from 'firebase/firestore';
 import User from '../components/User';
 import MessageForm from '../components/MessageForm';
+import Message from '../components/Message';
 import {ref, getDownloadURL, uploadBytes} from "firebase/storage";
 
 
@@ -13,11 +14,12 @@ const Home = () => {
     const [chat, setChat] = useState("");
     const [text, setText] = useState("");
     const [img, setImage] = useState("");
-    const user1 =auth.currentUser.uid;
+    const [msgs, setMsgs] = useState([]);
+    const user1 = auth.currentUser ? auth.currentUser.uid : null;
 
     useEffect(() => {
         const usersRef = collection(db, 'users');
-        //create qury object
+        //create query object
         const q = query(usersRef, where('uid', 'not-in', [user1]));
         //execute query
         const unsub = onSnapshot(q, querySnapshot => {
@@ -28,12 +30,28 @@ const Home = () => {
             setUsers(users);
         });
         return () => unsub();
-    }, []);
+    }, [user1]);
 
     const selectUser = (user) =>{
         setChat(user);
         console.log(user);
+
+        const user2 = user.uid;
+        const id = user1 > user2 ? `${user1 + user2} ` : `${user2 + user1} `;
+
+        const msgRef = collection(db, 'messages', id, 'chat');
+        const q = query(msgRef, orderBy('createdAt', 'asc'));
+
+        onSnapshot(q, querySnapshot => {
+            let msgs = [];
+            querySnapshot.forEach(doc => {
+                msgs.push(doc.data());
+            });
+            setMsgs(msgs);//pass msgs array to setMsgs
+        })
+        
     };
+    console.log(msgs);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -79,13 +97,14 @@ const Home = () => {
             <div className="messages_user">
               <h3>{chat.name}</h3>
             </div>
-{/*             <div className="messages">
+            {             
+            <div className="messages">
               {msgs.length
                 ? msgs.map((msg, i) => (
                     <Message key={i} msg={msg} user1={user1} />
                   ))
                 : null}
-            </div> */}
+            </div>}
             <MessageForm
               handleSubmit={handleSubmit}
               text={text}

@@ -130,7 +130,7 @@ section .form {
   width: 100vw;
 }
 
-/* //Users */
+/* Users */
 .users_container {
   margin-top: 10px;
   border-right: 2px solid var(--darkgrey-6);
@@ -170,6 +170,8 @@ section .form {
 .offline {
   background: var(--red-5);
 }
+
+/* Messages */
 .messages_container {
   position: relative;
   width: 100%;
