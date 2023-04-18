@@ -28,7 +28,7 @@ const Profile = () => {
       }
     });
     // upload new avatar image to Firebase Storage and update Firestore database
-    if(img){
+    if(img && user && user.avatarPath){
       const uploadImg = async () => {
         const imgRef = ref(
           storage, 
@@ -36,9 +36,7 @@ const Profile = () => {
           );
 
           try {
-            if(user.avatarPath){
-              await deleteObject(ref(storage, user.avatarPath));
-            }
+            await deleteObject(ref(storage, user.avatarPath));
             const snap = uploadBytes(imgRef, img);
             const url = await getDownloadURL(ref(storage, (await snap).ref.fullPath));
   
@@ -47,14 +45,14 @@ const Profile = () => {
               avatarPath: (await snap).ref.fullPath,
             });
             console.log(url);
-            setImg("");            
+            setImg("");           
           } catch (err) {
             console.log(err.message);
           }
         };
         uploadImg();
       }
-  }, [img]);
+  }, [img, user && user.avatarPath]);
 /*
 This code defines the deleteImage function, which is called when the user clicks on the delete button for their avatar image. 
 The function prompts the user to confirm the deletion, and if confirmed, deletes the image from Firebase Storage and updates 

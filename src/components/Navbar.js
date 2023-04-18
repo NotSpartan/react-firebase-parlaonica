@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
-import { updateDoc, doc , getDoc} from "firebase/firestore";
+import { updateDoc, doc } from "firebase/firestore"; // removed getDoc import
 import { AuthContext } from "../context/auth";
 import { useNavigate } from 'react-router-dom'; 
 

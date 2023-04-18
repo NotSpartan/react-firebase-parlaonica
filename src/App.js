@@ -7,7 +7,6 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from './pages/Profile'
 import AuthProvider from "./context/auth";
-import PrivateRoute from "./components/PrivateRoute";
 
 
 function App() {
