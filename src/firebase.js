@@ -1,5 +1,5 @@
 
-// Import the functions you need from the SDKs you need
+// This code imports the necessary functions from Firebase SDKs for authentication, database, and storage.
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -8,7 +8,8 @@ import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase confprocess.env.
+// The Firebase configuration object containing the API key, authentication domain, 
+//project ID, storage bucket, messaging sender ID, and app ID.
 const firebaseConfig = {
   apiKey: "AIzaSyButyiz1fx-sqarh81JeTBpiMF8tYwwsuk",
   authDomain: "parla-faae7.firebaseapp.com",
@@ -20,10 +21,11 @@ const firebaseConfig = {
 
 };
 
-// Initialize Firebase
+// Initializes the Firebase app with the configuration object.
 const app = initializeApp(firebaseConfig);
+// Initializes the Firebase authentication, database, and storage services using the app.
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
-
+// Exports the authentication, database, and storage services for use in other parts of the application.
 export { auth, db, storage};
