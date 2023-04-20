@@ -2,7 +2,7 @@
 // This code imports the necessary functions from Firebase SDKs for authentication, database, and storage.
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, query, where, onSnapshot } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -18,7 +18,6 @@ const firebaseConfig = {
   messagingSenderId: "450020603459",
   appId: "1:450020603459:web:628ac047c3e3712e7486f6",
   databaseUrl:"http://react-firebase-parla.firebaseio.com",
-
 };
 
 // Initializes the Firebase app with the configuration object.
