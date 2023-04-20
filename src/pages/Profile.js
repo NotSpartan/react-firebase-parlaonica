@@ -17,42 +17,42 @@ import Delete from "../components/svg/Delete";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const [img, setImg] = useState('');  // state to store the selected image file
-  const [user, setUser] = useState();  // state to store the user data retrieved from Firestore
+  const [img, setImg] = useState(null);  // state to store the selected image file
+  const [user, setUser] = useState(null);  // state to store the user data retrieved from Firestore
   const navigate = useNavigate();
-  useEffect(() => {
-    // retrieve user data from Firestore
-    getDoc(doc(db, "users", auth.currentUser.uid)).then(docSnap =>{
-      if(docSnap.exists){
-        setUser(docSnap.data());
-      }
-    });
-    // upload new avatar image to Firebase Storage and update Firestore database
-    if(img && user && user.avatarPath){
-      const uploadImg = async () => {
-        const imgRef = ref(
-          storage, 
-          `avatar/${new Date().getTime()} - ${img.name}`
-          );
 
+    useEffect(() => {
+      if (auth.currentUser) {
+        getDoc(doc(db, "users", auth.currentUser.uid)).then((docSnap) => {
+          if (docSnap.exists) {
+            setUser(docSnap.data());
+          }
+        });
+      }
+    }, []);
+
+    useEffect(() => {
+      if (img && auth.currentUser) {
+        const uploadImg = async () => {
+          const imgRef = ref(storage, `avatar/${new Date().getTime()} - ${img.name}`);
           try {
-            await deleteObject(ref(storage, user.avatarPath));
-            const snap = uploadBytes(imgRef, img);
-            const url = await getDownloadURL(ref(storage, (await snap).ref.fullPath));
-  
+            if (user?.avatarPath) {
+              await deleteObject(ref(storage, user.avatarPath));
+            }
+            const snap = await uploadBytes(imgRef, img);
+            const url = await getDownloadURL(ref(storage, snap.ref.fullPath));
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
               avatar: url,
-              avatarPath: (await snap).ref.fullPath,
+              avatarPath: snap.ref.fullPath,
             });
-            console.log(url);
-            setImg("");           
+            setImg(null);
           } catch (err) {
             console.log(err.message);
           }
         };
         uploadImg();
       }
-  }, [img, user && user.avatarPath]);
+    }, [img, user?.avatarPath]);
 /*
 This code defines the deleteImage function, which is called when the user clicks on the delete button for their avatar image. 
 The function prompts the user to confirm the deletion, and if confirmed, deletes the image from Firebase Storage and updates 
@@ -67,19 +67,20 @@ The component retrieves user data from Firestore and displays it on the page.
   const deleteImage = async () =>{
     try {
       const confirm = window.confirm('Delete avatar?'); // prompt user to confirm deletion
-        if(confirm){
+      if (confirm) {
+        if (user.avatarPath) {
           await deleteObject(ref(storage, user.avatarPath)); // delete image from Firebase Storage
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { // update Firestore database
-            avatar: "",
-            avatarPath: "",
-          });
-          navigate("/", { replace: true }); // navigate to home page
+        }
+        await updateDoc(doc(db, "users", auth.currentUser.uid), { // update Firestore database
+          avatar: "",
+          avatarPath: "",
+        });
+        navigate("/", { replace: true }); // navigate to home page
       }
-      
     } catch (error) {
       console.log(error.message); // log any errors
     }
-  }
+  };
 
 /* 
 This code uses conditional rendering to check if the `user` object exists. 
@@ -97,29 +98,35 @@ The function prompts the user to confirm the deletion, and if confirmed, deletes
 and updates the Firestore database accordingly.
 If the `user` object does not exist, the code returns `null`. 
 */
-  return user ?(
-    <section>
-      <div className="profile_container">
-        <div className="img_container">
-        <img src={user && user.avatar || Img} alt="avatar" />
-          <div className="overlay">
-            <label htmlFor="photo">
-              <Camera />
-            </label>
-            {user.avatar ? <Delete deleteImage={deleteImage}/> : null }
-            <input type="file" accept='image/*' style={{display: "none"}} id="photo" onChange={e => setImg(e.target.files[0])}/>
-          </div>
+return user ? (
+  <section>
+    <div className="profile_container">
+      <div className="img_container">
+        <img src={user.avatar || Img} alt="avatar" />
+        <div className="overlay">
+          <label htmlFor="photo">
+            <Camera />
+          </label>
+          {user.avatar ? <Delete deleteImage={deleteImage} /> : null}
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            id="photo"
+            onChange={(e) => setImg(e.target.files[0])}
+          />
         </div>
       </div>
+    </div>
 
-      <div className="text_container">
-        <h3>{user && user.name}</h3>
-        <p>{user && user.email}</p>
-        <hr />
-        <small>Joined on: {user.createdAt.toDate().toDateString()}</small>
-      </div>
-    </section>
-  )    :null;
-}
+    <div className="text_container">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+      <hr />
+      <small>Joined on: {user.createdAt.toDate().toDateString()}</small>
+    </div>
+  </section>
+) : null;
+};
 
 export default Profile;
