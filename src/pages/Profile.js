@@ -17,7 +17,7 @@ import Delete from "../components/svg/Delete";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const [img, setImg] = useState('');  // state to store the selected image file
+  const [img, setImg] = useState("");  // state to store the selected image file
   const [user, setUser] = useState();  // state to store the user data retrieved from Firestore
   const navigate = useNavigate();
   useEffect(() => {
@@ -28,7 +28,7 @@ const Profile = () => {
       }
     });
     // upload new avatar image to Firebase Storage and update Firestore database
-    if(img && user && user.avatarPath){
+    if(img){
       const uploadImg = async () => {
         const imgRef = ref(
           storage, 
@@ -36,22 +36,25 @@ const Profile = () => {
           );
 
           try {
-            await deleteObject(ref(storage, user.avatarPath));
-            const snap = uploadBytes(imgRef, img);
-            const url = await getDownloadURL(ref(storage, (await snap).ref.fullPath));
+            if (user.avatarPath) {
+              await deleteObject(ref(storage, user.avatarPath));
+            }
+            const snap = await uploadBytes(imgRef, img);
+            const url = await getDownloadURL(ref(storage, snap.ref.fullPath));
   
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
               avatar: url,
-              avatarPath: (await snap).ref.fullPath,
+              avatarPath: snap.ref.fullPath,
             });
-            setImg("");           
+  
+            setImg("");
           } catch (err) {
             console.log(err.message);
           }
         };
         uploadImg();
       }
-  }, [img, user && user.avatarPath]);
+    }, [img]);
 /*
 This code defines the deleteImage function, which is called when the user clicks on the delete button for their avatar image. 
 The function prompts the user to confirm the deletion, and if confirmed, deletes the image from Firebase Storage and updates 
