@@ -36,9 +36,7 @@ const Profile = () => {
           );
 
           try {
-            if (user.avatarPath) {
-              await deleteObject(ref(storage, user.avatarPath));
-            }
+            await deleteObject(ref(storage, user.avatarPath));
             const snap = await uploadBytes(imgRef, img);
             const url = await getDownloadURL(ref(storage, snap.ref.fullPath));
   
