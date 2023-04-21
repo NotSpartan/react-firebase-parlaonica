@@ -15,16 +15,19 @@ the message text as the user types.
 The form is submitted when the user clicks the Send button, which calls the handleSubmit function.
 */
 
-import React from "react";
+import React, {useRef} from "react";
 import Attachment from "./svg/Attachment";
 
-const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
+const MessageForm = ({ handleSubmit, text, setText, setImg}) => {
+  const fileInputRef = useRef(null);
+
   return (
     <form className="message_form" onSubmit={handleSubmit}>
       <label htmlFor="img">
         <Attachment />
       </label>
       <input
+        ref={fileInputRef}
         onChange={(e) => setImg(e.target.files[0])}
         type="file"
         id="img"

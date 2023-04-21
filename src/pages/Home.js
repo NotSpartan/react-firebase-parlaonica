@@ -59,13 +59,20 @@ import { async } from 'q';
 
 
 const Home = () => {
+  // State variables for users, chat, text, image, and messages
     const [users, setUsers] = useState([]);
     const [chat, setChat] = useState("");
     const [text, setText] = useState("");
     const [img, setImage] = useState("");
     const [msgs, setMsgs] = useState([]);
+    // Get the current user’s ID
     const user1 = auth.currentUser ? auth.currentUser.uid : null;
 
+    /**
+ * useEffect hook that listens for changes in the current user's authentication status.
+ * If the user is authenticated, it fetches all users except the current user from the database
+ * and sets the users state variable to the fetched data.
+ */
     useEffect(() => {
       if (user1) {
         const usersRef = collection(db, 'users');
@@ -134,6 +141,10 @@ const Home = () => {
             createdAt: Timestamp.fromDate(new Date()),
             media: url || "",
         });
+
+        if (img) {
+          setImage(""); // clear image state
+          }
 
         await setDoc (doc(db, 'lastMsg', id),{
           text,
